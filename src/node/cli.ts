@@ -5,6 +5,7 @@ import { build, createServer, serve } from '.'
 import { init } from './init/init'
 import { version } from '../../package.json'
 import { bindShortcuts } from './shortcuts'
+import { debugLog } from './utils/utils'
 
 const argv: any = minimist(process.argv.slice(2))
 
@@ -36,6 +37,8 @@ if (!command || command === 'dev') {
     server.printUrls()
     bindShortcuts(server, createDevServer)
   }
+  debugger
+  debugLog('dev开发服务启动')
   createDevServer().catch((err) => {
     createLogger().error(
       `${c.red(`failed to start server. error:`)}\n${err.stack}`

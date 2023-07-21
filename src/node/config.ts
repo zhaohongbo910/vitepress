@@ -18,6 +18,7 @@ import {
   type SiteData
 } from './shared'
 import type { RawConfigExports, SiteConfig, UserConfig } from './siteConfig'
+import { debugLog } from './server'
 
 export { resolvePages } from './plugins/dynamicRoutesPlugin'
 export * from './siteConfig'
@@ -58,7 +59,7 @@ export async function resolveConfig(
 ): Promise<SiteConfig> {
   // normalize root into absolute path
   root = normalizePath(path.resolve(root))
-
+  debugLog('解析用户配置文件')
   const [userConfig, configPath, configDeps] = await resolveUserConfig(
     root,
     command,
@@ -71,8 +72,11 @@ export async function resolveConfig(
       prefix: '[vitepress]',
       allowClearScreen: userConfig.vite?.clearScreen
     })
+  debugLog('解析用户站点数据')
   const site = await resolveSiteData(root, userConfig)
+
   const srcDir = normalizePath(path.resolve(root, userConfig.srcDir || '.'))
+
   const assetsDir = userConfig.assetsDir
     ? userConfig.assetsDir.replace(/\//g, '')
     : 'assets'
@@ -88,7 +92,7 @@ export async function resolveConfig(
   const themeDir = (await fs.pathExists(userThemeDir))
     ? userThemeDir
     : DEFAULT_THEME_PATH
-
+  debugLog('解析文章配置路径，动态路由，重写路由')
   const { pages, dynamicRoutes, rewrites } = await resolvePages(
     srcDir,
     userConfig
@@ -170,7 +174,7 @@ export async function resolveUserConfig(
     }
     debug(`loaded config at ${c.yellow(configPath)}`)
   }
-
+  debugLog('返回用户配置信息')
   return [await resolveConfigExtends(userConfig), configPath, configDeps]
 }
 
@@ -180,6 +184,7 @@ async function resolveConfigExtends(
   const resolved = await (typeof config === 'function' ? config() : config)
   if (resolved.extends) {
     const base = await resolveConfigExtends(resolved.extends)
+    debugLog('合并配置')
     return mergeConfig(base, resolved)
   }
   return resolved
@@ -221,7 +226,7 @@ export async function resolveSiteData(
   mode = 'development'
 ): Promise<SiteData> {
   userConfig = userConfig || (await resolveUserConfig(root, command, mode))[0]
-
+  debugLog('站点数据返回')
   return {
     lang: userConfig.lang || 'en-US',
     dir: userConfig.dir || 'ltr',

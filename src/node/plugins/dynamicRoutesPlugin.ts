@@ -10,6 +10,7 @@ import path from 'path'
 import fg from 'fast-glob'
 import { type SiteConfig, type UserConfig } from '../siteConfig'
 import { resolveRewrites } from './rewritesPlugin'
+import { debugLog } from '../utils/utils'
 
 export const dynamicRouteRE = /\[(\w+?)\]/g
 
@@ -26,7 +27,7 @@ export async function resolvePages(srcDir: string, userConfig: UserConfig) {
       ignore: ['**/node_modules', ...(userConfig.srcExclude || [])]
     })
   ).sort()
-
+  debugLog(`获取所有的markdown文件 ${allMarkdownFiles}`)
   const pages: string[] = []
   const dynamicRouteFiles: string[] = []
 
